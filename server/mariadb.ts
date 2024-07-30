@@ -1,5 +1,5 @@
-import { createConnection, Connection } from 'mysql2';
-import * as dotenv from 'dotenv';
+import { createConnection, Connection } from "mysql2";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
@@ -9,7 +9,7 @@ interface ConnectionConfig {
   password: string;
   database: string;
   dateStrings: boolean;
-}
+};
 
 const config: ConnectionConfig = {
   host: process.env.HOST as string,

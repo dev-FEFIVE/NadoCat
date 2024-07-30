@@ -1,11 +1,11 @@
-import express, { Request, Response } from 'express';
-import connection from './mariadb';
-import * as dotenv from 'dotenv';
+import express, { Request, Response } from "express";
+import connection from "./mariadb";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
 const getTestString = (req: Request, res: Response) => {
-  const sql = 'SELECT * FROM TestString';
+  const sql = "SELECT * FROM TestString";
   
   connection.query(sql, (err, results) => {
     if (err) {
@@ -21,10 +21,10 @@ const getTestString = (req: Request, res: Response) => {
 const testApp = () => {
   const router = express.Router();
   router.use(express.json());
-  router.get('', getTestString);
+  router.get("", getTestString);
 
   const app = express();
-  app.use('', router);
+  app.use("", router);
 
   app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
