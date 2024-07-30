@@ -1,0 +1,25 @@
+/* font */
+@font-face {
+  font-family: "Pretendard-Bold";
+  src: url("../../../assets/fonts/Pretendard-Bold.ttf");
+}
+@font-face {
+  font-family: "Pretendard-SemiBold";
+  src: url("../../../assets/fonts/Pretendard-SemiBold.ttf");
+}
+@font-face {
+  font-family: "Pretendard-Medium";
+  src: url("../../../assets/fonts/Pretendard-Medium.ttf");
+}
+@font-face {
+  font-family: "Pretendard-Regular";
+  src: url("../../../assets/fonts/Pretendard-Regular.ttf");
+}
+/* font size */
+/* color palette */
+/* radious */
+/* buttons */
+/* tags */
+/* others */
+
+/*# sourceMappingURL=common.css.map */

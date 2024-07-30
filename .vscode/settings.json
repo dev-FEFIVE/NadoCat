@@ -7,5 +7,6 @@
   "javascript.preferences.quoteStyle": "double",
   "typescript.preferences.quoteStyle": "double",
   "prettier.jsxSingleQuote": false,
-  "prettier.singleQuote": false
+  "prettier.singleQuote": false,
+  "liveServer.settings.port": 5501
 }
