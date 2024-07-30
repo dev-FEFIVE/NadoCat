@@ -3,10 +3,8 @@ const express = require("express");
 const router = express.Router();
 const app = express();
 
-app.listen(3000);
-
 const getTestString = (req, res) => {
-  let sql = "SELECT * FROM nadocat.TestString";
+  let sql = "SELECT * FROM TestString";
   
   conn.query(sql, 
       (err, results) => {
@@ -18,8 +16,11 @@ const getTestString = (req, res) => {
   )
 }
 
+
 router.use(express.json());
 
 router.get('', getTestString);
 
-app.use("/", router);
+app.use("", router);
+
+app.listen(3000);
