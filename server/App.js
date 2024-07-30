@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const app = express();
 
-app.listen(80);
+app.listen(3000);
 
 const getTestString = (req, res) => {
   let sql = "SELECT * FROM nadocat.TestString";
