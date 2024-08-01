@@ -1,34 +1,25 @@
 import express, { Request, Response } from "express";
-import connection from "./mariadb";
-import * as dotenv from "dotenv";
+import prisma from "./client";
 
-dotenv.config();
+const PORT = process.env.PORT || 3000;
 
-const getTestString = (req: Request, res: Response) => {
-  const sql = "SELECT * FROM TestString";
-  
-  connection.query(sql, (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json(err);
-    } else {
-      console.log(results);
-      res.json(results);
-    }
-  });
-};
+const app = express();
+app.use(express.json());
 
-const testApp = () => {
-  const router = express.Router();
-  router.use(express.json());
-  router.get("", getTestString);
+app.get("/", async (req: Request, res: Response) => {
+  const result = await prisma.testString.findMany();
+  res.json(result);
+});
 
-  const app = express();
-  app.use("", router);
+app.use((_req: Request, res: Response) => {
+  res.sendStatus(404);
+});
 
-  app.listen(Number(process.env.PORT),"0.0.0.0", () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-  });
-};
+app.use((error: any, _req: Request, res: Response) => {
+  console.error(error);
+  res.sendStatus(500);
+});
 
-testApp();
+app.listen(PORT, () => {
+  console.log(`http://localhost:${PORT}`);
+});
