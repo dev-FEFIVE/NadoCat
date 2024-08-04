@@ -348,3 +348,70 @@ export const deleteCommunity = async (req: Request, res: Response) => {
       .json({ message: "Internal Server Error" });
   }
 };
+
+//TODO: 댓글 조회
+export const getComments = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.community_id);
+    const limit = Number(req.query.limit) || 5;
+    const cursor = req.query.cursor ? Number(req.query.cursor) : undefined;
+    const count = await prisma.community_comments.count({
+      where: {
+        community_id: id,
+      },
+    });
+    const comments = await prisma.community_comments.findMany({
+      where: {
+        community_id: id,
+      },
+      take: limit,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { community_comment_id: cursor } : undefined,
+      orderBy: [
+        {
+          community_comment_id: "asc",
+        },
+      ],
+      select: {
+        community_comment_id: true,
+        comment: true,
+        users: {
+          select: {
+            id: true,
+            user_id: true,
+            name: true,
+            profile_image: true,
+          },
+        },
+      },
+    });
+
+    const nextCursor =
+      comments.length === limit
+        ? comments[comments.length - 1].community_comment_id
+        : null;
+
+    const result = {
+      comments,
+      nextCursor,
+      totalCount: count,
+    };
+
+    res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+};
+
+//TODO: 댓글 수정
+export const updateComment = async (req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json("댓글 조회");
+};
+
+//TODO: 댓글 삭제
+export const deleteComment = async (req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json("댓글 삭제");
+};
