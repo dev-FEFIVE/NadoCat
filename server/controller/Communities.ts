@@ -406,9 +406,39 @@ export const getComments = async (req: Request, res: Response) => {
   }
 };
 
+// TODO: 댓글 작성
+export const createComment = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.community_id);
+    const comment = req.body.comment;
+    const userId = "aaa"; // 임시 값
+
+    if (!comment) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "입력값을 확인해 주세요." });
+    }
+
+    await prisma.community_comments.create({
+      data: {
+        user_id: userId,
+        community_id: id,
+        comment,
+      },
+    });
+
+    res.status(StatusCodes.CREATED).json({ message: "댓글이 등록되었습니다." });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
+};
+
 //TODO: 댓글 수정
 export const updateComment = async (req: Request, res: Response) => {
-  res.status(StatusCodes.OK).json("댓글 조회");
+  res.status(StatusCodes.OK).json("댓글 수정");
 };
 
 //TODO: 댓글 삭제
