@@ -472,5 +472,24 @@ export const updateComment = async (req: Request, res: Response) => {
 
 //TODO: 댓글 삭제
 export const deleteComment = async (req: Request, res: Response) => {
-  res.status(StatusCodes.OK).json("댓글 삭제");
+  try {
+    const id = Number(req.params.community_id);
+    const commentId = Number(req.params.comment_id);
+    const userId = "aaa"; // 임시 값
+
+    await prisma.community_comments.delete({
+      where: {
+        community_id: id,
+        community_comment_id: commentId,
+        user_id: userId,
+      },
+    });
+
+    res.status(StatusCodes.OK).json({ message: "댓글이 삭제되었습니다." });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 };
