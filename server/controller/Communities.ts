@@ -163,9 +163,50 @@ export const getCommunity = async (req: Request, res: Response) => {
   }
 };
 
-// TODO: 게시글 작성
+// TODO: 게시글 작성, 이미지 저장 수정 필요
 export const createCommunity = async (req: Request, res: Response) => {
-  res.json("게시글 작성");
+  try {
+    const { title, content, tags, images } = req.body;
+    const categoryId = Number(req.query.category_id) || 1;
+    const userId = "aaa"; // 임시 값
+
+    const addPost = await prisma.communities.create({
+      data: {
+        user_id: userId,
+        title,
+        content,
+      },
+    });
+
+    const formatedTag = tags.map((tag: string) => ({
+      tag,
+      category_id: categoryId,
+      post_id: addPost.post_id,
+    }));
+
+    await prisma.tags.createMany({
+      data: formatedTag,
+    });
+
+    const formatedImages = images.map((image: string) => ({
+      url: image,
+      post_id: addPost.post_id,
+      category_id: categoryId,
+    }));
+
+    await prisma.images.createMany({
+      data: formatedImages,
+    });
+
+    res
+      .status(StatusCodes.CREATED)
+      .json({ message: "게시글이 등록되었습니다." });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 };
 
 // TODO: 게시글 수정
