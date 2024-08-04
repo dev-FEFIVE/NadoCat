@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../client";
+import { Prisma } from "@prisma/client";
 
 // TODO: 목록 조회 - 이미지 배열로 받아오게 수정(DB를 변경해야 함), ✅페이지네이션 추가, 정렬 추가(✅최신순, ✅조회순, 인기순)
 
@@ -113,7 +114,6 @@ export const getCommunity = async (req: Request, res: Response) => {
         views: true,
         created_at: true,
         updated_at: true,
-        // thumbnail: true,
         users: {
           select: {
             id: true,
@@ -175,5 +175,43 @@ export const updateCommunity = async (req: Request, res: Response) => {
 
 // TODO: 게시글 삭제
 export const deleteCommunity = async (req: Request, res: Response) => {
-  res.json("게시글 삭제");
+  try {
+    const id = Number(req.params.community_id);
+    const categoryId = Number(req.query.category_id) || 1;
+
+    await prisma.tags.deleteMany({
+      where: {
+        post_id: id,
+        category_id: categoryId,
+      },
+    });
+
+    await prisma.images.deleteMany({
+      where: {
+        post_id: id,
+        category_id: categoryId,
+      },
+    });
+
+    await prisma.communities.delete({
+      where: {
+        post_id: id,
+      },
+    });
+
+    res.status(StatusCodes.OK).json({ message: "게시글이 삭제되었습니다." });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "게시글이 존재하지 않습니다" });
+      }
+    }
+
+    console.error(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 };
