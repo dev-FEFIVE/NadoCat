@@ -97,7 +97,7 @@ export const getCommunities = async (req: Request, res: Response) => {
   }
 };
 
-// TODO: 상세 조회 - 이미지 배열로 받아오게 수정하기(DB를 변경해야 함),
+// TODO: 상세 조회 - 이미지 배열로 받아오게 수정하기(DB를 변경해야 함)
 export const getCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
@@ -163,7 +163,7 @@ export const getCommunity = async (req: Request, res: Response) => {
   }
 };
 
-// TODO: 게시글 작성, 이미지 저장 수정 필요
+// TODO: 게시글 작성, 이미지 업로드 수정 필요
 export const createCommunity = async (req: Request, res: Response) => {
   try {
     const { title, content, tags, images } = req.body;
@@ -209,9 +209,101 @@ export const createCommunity = async (req: Request, res: Response) => {
   }
 };
 
-// TODO: 게시글 수정
+// TODO: 게시글 수정, 이미지 업로드 수정 필요
 export const updateCommunity = async (req: Request, res: Response) => {
-  res.json("게시글 수정");
+  try {
+    const id = Number(req.params.community_id);
+    const categoryId = Number(req.query.category_id) || 1;
+    const {
+      title,
+      content,
+      images,
+      tags,
+      newTags,
+      deleteTags,
+      newImages,
+      deleteImages,
+    } = req.body;
+
+    if (
+      !title ||
+      !content ||
+      !images ||
+      !tags ||
+      !newTags ||
+      !deleteTags ||
+      !newImages ||
+      !deleteImages
+    ) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "입력값을 확인해 주세요." });
+    }
+
+    // 게시글 수정
+    await prisma.communities.update({
+      where: {
+        post_id: id,
+      },
+      data: {
+        title,
+        content,
+      },
+    });
+
+    // 태그 삭제
+    await prisma.tags.deleteMany({
+      where: {
+        post_id: id,
+        category_id: categoryId,
+        tag_id: {
+          in: deleteTags,
+        },
+      },
+    });
+
+    const formatedTag = newTags.map((tag: string) => ({
+      tag,
+      category_id: categoryId,
+      post_id: id,
+    }));
+
+    // 태그 추가
+    await prisma.tags.createMany({
+      data: formatedTag,
+    });
+
+    // 이미지 삭제
+    await prisma.images.deleteMany({
+      where: {
+        post_id: id,
+        category_id: categoryId,
+        image_id: {
+          in: deleteImages,
+        },
+      },
+    });
+
+    const formatedImages = newImages.map((image: string) => ({
+      url: image,
+      category_id: categoryId,
+      post_id: id,
+    }));
+
+    // 이미지 추가
+    await prisma.images.createMany({
+      data: formatedImages,
+    });
+
+    res
+      .status(StatusCodes.CREATED)
+      .json({ message: "게시글이 수정되었습니다." });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 };
 
 // TODO: 게시글 삭제
