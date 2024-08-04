@@ -6,9 +6,9 @@ const MyPage = () => {
       console.log('hi')
   })
   return (
-    <div className='myPage'>
+    <div className="myPage">
         <BackButton />
-        
+        <div id="title">관심글</div>
     </div>
   );
 };
