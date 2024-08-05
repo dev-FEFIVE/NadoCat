@@ -26,6 +26,7 @@ export const getCommunities = async (req: Request, res: Response) => {
     const orderBy = getOrderBy(sort);
     const categoryId = Number(req.query.category_id) || 1;
     const count = await prisma.communities.count();
+
     const communities = await prisma.communities.findMany({
       where: {
         category_id: categoryId,
@@ -38,7 +39,7 @@ export const getCommunities = async (req: Request, res: Response) => {
           [orderBy.sortBy]: orderBy.sortOrder,
         },
         {
-          post_id: "asc",
+          post_id: "desc",
         },
       ],
       select: {
@@ -54,7 +55,7 @@ export const getCommunities = async (req: Request, res: Response) => {
           select: {
             id: true,
             user_id: true,
-            name: true,
+            nickname: true,
             profile_image: true,
           },
         },
@@ -84,8 +85,10 @@ export const getCommunities = async (req: Request, res: Response) => {
 
     const result = {
       posts: communities,
-      nextCursor,
-      totalCount: count,
+      pagination: {
+        nextCursor,
+        totalCount: count,
+      },
     };
 
     res.status(StatusCodes.OK).json(result);
@@ -97,11 +100,13 @@ export const getCommunities = async (req: Request, res: Response) => {
   }
 };
 
-// TODO: 상세 조회 - 이미지 배열로 받아오게 수정하기(DB를 변경해야 함)
+// TODO: 상세 조회 - 이미지 배열로 받아오게 수정하기(DB를 변경해야 함), ✅likes, liked 추가 필요
 export const getCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const categoryId = Number(req.query.category_id) || 1;
+    const userId = "aaa"; // 임시 값
+
     const community = await prisma.communities.findUnique({
       where: {
         post_id: id,
@@ -119,7 +124,7 @@ export const getCommunity = async (req: Request, res: Response) => {
           select: {
             id: true,
             user_id: true,
-            name: true,
+            nickname: true,
             profile_image: true,
           },
         },
@@ -158,7 +163,30 @@ export const getCommunity = async (req: Request, res: Response) => {
         .json({ message: "존재하지 않는 게시글 입니다." });
     }
 
-    res.status(StatusCodes.OK).json(community);
+    // 좋아요 수
+    const likes = await prisma.likes.count({
+      where: {
+        post_id: id,
+        category_id: categoryId,
+      },
+    });
+
+    // 좋아요 여부
+    const liked = await prisma.likes.findFirst({
+      where: {
+        post_id: id,
+        category_id: categoryId,
+        user_id: userId,
+      },
+    });
+
+    const result = {
+      ...community,
+      likes,
+      liked: !!liked,
+    };
+
+    res.status(StatusCodes.OK).json(result);
   } catch (error) {
     res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
   }
@@ -384,7 +412,7 @@ export const getComments = async (req: Request, res: Response) => {
           select: {
             id: true,
             user_id: true,
-            name: true,
+            nickname: true,
             profile_image: true,
           },
         },
@@ -398,8 +426,10 @@ export const getComments = async (req: Request, res: Response) => {
 
     const result = {
       comments,
-      nextCursor,
-      totalCount: count,
+      pagination: {
+        nextCursor,
+        totalCount: count,
+      },
     };
 
     res.status(StatusCodes.OK).json(result);
