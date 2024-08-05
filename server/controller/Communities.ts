@@ -199,32 +199,39 @@ export const createCommunity = async (req: Request, res: Response) => {
     const categoryId = Number(req.query.category_id) || 1;
     const userId = "aaa"; // 임시 값
 
-    const addPost = await prisma.communities.create({
-      data: {
-        user_id: userId,
-        title,
-        content,
-      },
-    });
+    await prisma.$transaction(async (prisma) => {
+      const addPost = await prisma.communities.create({
+        data: {
+          user_id: userId,
+          title,
+          content,
+          category_id: categoryId,
+        },
+      });
 
-    const formatedTag = tags.map((tag: string) => ({
-      tag,
-      category_id: categoryId,
-      post_id: addPost.post_id,
-    }));
+      if (tags.length > 0) {
+        const formatedTags = tags.map((tag: string) => ({
+          tag: tag,
+          post_id: addPost.post_id,
+          category_id: categoryId,
+        }));
 
-    await prisma.tags.createMany({
-      data: formatedTag,
-    });
+        await prisma.tags.createMany({
+          data: formatedTags,
+        });
+      }
 
-    const formatedImages = images.map((image: string) => ({
-      url: image,
-      post_id: addPost.post_id,
-      category_id: categoryId,
-    }));
+      if (images.length > 0) {
+        const formatedImages = images.map((image: string) => ({
+          url: image,
+          post_id: addPost.post_id,
+          category_id: categoryId,
+        }));
 
-    await prisma.images.createMany({
-      data: formatedImages,
+        await prisma.images.createMany({
+          data: formatedImages,
+        });
+      }
     });
 
     res
