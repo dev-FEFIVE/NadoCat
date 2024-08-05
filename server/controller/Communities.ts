@@ -101,10 +101,11 @@ export const getCommunities = async (req: Request, res: Response) => {
 export const getCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
+    const categoryId = Number(req.query.category_id) || 1;
     const community = await prisma.communities.findUnique({
       where: {
         post_id: id,
-        category_id: 1,
+        category_id: categoryId,
       },
       select: {
         post_id: true,
@@ -138,7 +139,7 @@ export const getCommunity = async (req: Request, res: Response) => {
         tags: {
           where: {
             post_id: id,
-            category_id: 1,
+            category_id: categoryId,
           },
           select: {
             tag_id: true,
@@ -214,6 +215,7 @@ export const updateCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const categoryId = Number(req.query.category_id) || 1;
+    const userId = "aaa"; // 임시 값
     const {
       title,
       content,
@@ -244,6 +246,7 @@ export const updateCommunity = async (req: Request, res: Response) => {
     await prisma.communities.update({
       where: {
         post_id: id,
+        user_id: userId,
       },
       data: {
         title,
@@ -311,6 +314,7 @@ export const deleteCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const categoryId = Number(req.query.category_id) || 1;
+    const userId = "aaa"; // 임시 값
 
     await prisma.tags.deleteMany({
       where: {
@@ -329,6 +333,7 @@ export const deleteCommunity = async (req: Request, res: Response) => {
     await prisma.communities.delete({
       where: {
         post_id: id,
+        user_id: userId,
       },
     });
 
