@@ -1,5 +1,5 @@
 import express from "express";
-import { getMissings } from "../controller/MissingController";
+import { getMissings } from "../controller/MissingsController";
 
 const router = express.Router();
 router.use(express.json());

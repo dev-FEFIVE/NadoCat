@@ -1,4 +1,4 @@
-import prisma from "./../client";
+import prisma from "../client";
 import { Request, Response } from "express";
 
 export const getMissings = async (req: Request, res: Response) => {
