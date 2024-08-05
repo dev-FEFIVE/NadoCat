@@ -9,7 +9,7 @@ import {
   updateComment,
   deleteComment,
   createComment,
-} from "../controller/Communities";
+} from "../controller/CommunitiesController";
 
 const router = express.Router();
 
