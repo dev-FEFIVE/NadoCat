@@ -1,38 +1,69 @@
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { ResultSetHeader } from "mysql2";
-import conn from "../mariadb";
 import {StatusCodes} from "http-status-codes";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
-import crypto from "crypto";
+import bcryto from "bcrypt";
+// import crypto from "crypto";
 
+const prisma = new PrismaClient();
 
 //회원가입
 const signup = async (req: Request, res: Response) => {
   const {userid, email, nickname, password, authtype} = req.body;
 
-  const userSql = "INSERT INTO users (user_id, email, nickname, auth_type) VALUES (?, ?, ?, ?)";
-  const userValues = [userid, email, nickname, authtype];
-  
-  const salt = crypto.randomBytes(10).toString("base64");
-  const hashPassword = crypto.pbkdf2Sync(password, salt, 10000, 10, "sha512").toString("base64");
-  
-  const secretSql = "INSERT INTO user_secrets (user_id, hash_password, salt) VALUES (?, ?, ?)";
-  const secretValues = [userid, hashPassword, salt];
+  const hashing = async (password: string) => {
+    const saltRound = 10; 
+    const salt = await bcryto.genSalt(saltRound);
+
+    const hashPassword = await bcryto.hash(password, salt);
+    return {salt, hashPassword};
+  }
 
   //DB저장
   try{
-    const [userResult] = await conn.promise().query<ResultSetHeader>(userSql, userValues);
-    const [secretResult] = await conn.promise().query<ResultSetHeader>(secretSql, secretValues);
+    const {salt, hashPassword} = await hashing(password);
 
-    if(userResult.affectedRows && secretResult.affectedRows){
-      return res.status(StatusCodes.CREATED).json({message: "회원가입 성공!"});
+    const result = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.users.create({
+        data: {
+          user_id: userid,
+          email: email,
+          nickname: nickname,
+          auth_type: authtype,
+          status: "active",  //default: active
+        },
+      });
+
+      const secretUser = await prisma.user_secrets.create({
+        data: {
+          user_id: userid,
+          hash_password: hashPassword,
+          salt: salt,
+        },
+      });
+
+      return {user, secretUser};
+    })
+
+
+    if(result.user && result.secretUser){
+      return res.status(StatusCodes.CREATED).json({
+        message: "회원가입 성공!",
+        user: {
+          id: result.user.id,
+          userId: result.user.user_id,
+          email: result.user.email,
+          nickname: result.user.nickname,
+          authtype: result.user.auth_type
+        }
+      });
     }else{
-      return res.status(StatusCodes.BAD_REQUEST).end();
+      return res.status(StatusCodes.BAD_REQUEST).json({message: "회원가입 실패!"});
     }
 
   }catch(error){
+    console.log("회원가입 error:", error);
     return res.status(StatusCodes.BAD_REQUEST).end();
   }
 };
