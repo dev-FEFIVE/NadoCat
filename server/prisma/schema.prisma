@@ -100,10 +100,13 @@ model events {
   user_id          String           @db.VarChar(45)
   event_comments   event_comments[]
   board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "events_category_id_fk")
+  images           images?          @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "events_thumbnail_fk")
   users            users            @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "events_user_id_fk")
+  tags             tags[]
 
   @@id([post_id, category_id])
   @@index([category_id], map: "events_category_id_fk_idx")
+  @@index([thumbnail], map: "events_thumbnail_fk_idx")
   @@index([user_id])
 }
 
@@ -136,14 +139,15 @@ model images {
   url              String            @db.VarChar(100)
   post_id          Int
   category_id      Int
+  events           events[]
   board_categories board_categories  @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "images_category_id")
-  communities      communities       @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "images_commu_post_id_fk")
+  communities      communities       @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "images_communities_post_id_fk")
   missing_reports  missing_reports[]
   missings         missings[]
   street_cats      street_cats[]
 
-  @@index([category_id, post_id], map: "images_category_id_idx")
-  @@index([post_id], map: "images_commu_post_id_fk_idx")
+  @@index([category_id])
+  @@index([post_id], map: "images_communities_post_id_fk_idx")
 }
 
 model likes {
@@ -307,8 +311,8 @@ model street_cats {
   post_id              Int                    @unique(map: "post_id_UNIQUE") @default(autoincrement())
   category_id          Int                    @default(5)
   name                 String?                @db.VarChar(10)
-  gender               String?                @db.Char(1)
-  neutered             Boolean                @default(false)
+  gender               String                 @db.VarChar(10)
+  neutered             String                 @db.VarChar(10)
   neutering_date       DateTime?              @db.Date
   discovery_date       DateTime?              @db.Date
   location_id          Int
@@ -324,6 +328,7 @@ model street_cats {
   locations            locations              @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_location_id_fk")
   images               images?                @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_thumbnail_fk")
   users                users                  @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_user_id_fk")
+  tags                 tags[]
 
   @@id([post_id, category_id])
   @@index([category_id])
@@ -338,10 +343,12 @@ model tags {
   category_id      Int
   post_id          Int
   board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_category_id_fk")
-  communities      communities      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_commu_post_id_fk")
+  communities      communities      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_communities_post_id_fk")
+  events           events           @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_events_post_id_fk")
+  street_cats      street_cats      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_street_cats_post_id_fk")
 
   @@index([category_id], map: "tags_category_id_fk_idx")
-  @@index([post_id], map: "tags_commu_post_id_fk_idx")
+  @@index([post_id], map: "tags_communities_post_id_fk_idx")
 }
 
 model user_oauth_secrets {

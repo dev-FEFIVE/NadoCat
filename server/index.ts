@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import MissingRouter from "./routes/missings";
 import CommunitiesRouter from "./routes/communities";
 import StreetCatsRouter from "./routes/streetCats";
 
@@ -9,6 +10,7 @@ app.use(express.json());
 
 app.use("/boards/communities", CommunitiesRouter);
 app.use("/boards/street-cats", StreetCatsRouter);
+app.use('/boards/missings', MissingRouter);
 
 app.use((_req: Request, res: Response) => {
   res.sendStatus(404);
