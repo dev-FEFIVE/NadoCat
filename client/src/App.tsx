@@ -1,9 +1,16 @@
-import './App.css'
+import { BrowserRouter,Routes, Route } from "react-router-dom";
+import MyPage from "./pages/MyPage";
+import React from "react";
 
-function App() {
+const App: React.FC = () => {
   return (
-   <div>ddd</div>
+   <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<MyPage/>} />
+    </Routes>
+   </BrowserRouter>
+
   )
 }
 
-export default App
+export default App;
