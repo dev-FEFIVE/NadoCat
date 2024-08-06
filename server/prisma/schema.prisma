@@ -7,23 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TestString {
-  idTestString  Int    @id @default(autoincrement())
-  TestStringcol String @db.VarChar(45)
-}
-
 model board_categories {
   category_id     Int               @id @unique(map: "category_id_UNIQUE") @default(autoincrement())
   category        String            @unique(map: "category_UNIQUE") @db.VarChar(20)
   communities     communities[]
   events          events[]
-  images          images[]
   likes           likes[]
   missing_reports missing_reports[]
   missings        missings[]
   reports         reports[]
   street_cats     street_cats[]
-  tags            tags[]
 }
 
 model chats {
@@ -48,14 +41,13 @@ model communities {
   thumbnail          Int?
   user_id            String               @db.VarChar(45)
   board_categories   board_categories     @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_category_id_fk")
-  images             images?              @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_thumbnail_fk")
   users              users                @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_user_id_fk")
   community_comments community_comments[]
-  tags               tags[]
+  community_images   community_images[]
+  community_tags     community_tags[]
 
   @@id([post_id, category_id])
   @@index([category_id])
-  @@index([thumbnail], map: "communities_thumnail_fk_idx")
   @@index([user_id], map: "communities_user_id_fk_idx")
 }
 
@@ -73,6 +65,24 @@ model community_comments {
   @@index([user_id], map: "community_comments_user_id_fk_idx")
 }
 
+model community_images {
+  image_id    Int         @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
+  post_id     Int
+  images      images      @relation(fields: [image_id], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "community_images_image_id_fk")
+  communities communities @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "community_images_post_id_fk")
+
+  @@index([post_id], map: "community_images_post_id_fk_idx")
+}
+
+model community_tags {
+  tag_id      Int         @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  post_id     Int
+  communities communities @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "community_tags_post_id_fk")
+  tags        tags        @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "community_tags_tag_id_fk")
+
+  @@index([post_id], map: "community_tags_post_id_fk_idx")
+}
+
 model event_comments {
   event_comment_id Int      @id @unique(map: "event_comment_id_UNIQUE") @default(autoincrement())
   event_id         Int
@@ -87,6 +97,24 @@ model event_comments {
   @@index([user_id], map: "event_comments_user_id_fk_idx")
 }
 
+model event_images {
+  image_id Int     @id
+  post_id  Int?
+  images   images  @relation(fields: [image_id], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "event_images_image_id_fk")
+  events   events? @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "event_images_post_id_fk")
+
+  @@index([post_id], map: "event_images_post_id_fk_idx")
+}
+
+model event_tags {
+  tag_id  Int    @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  post_id Int
+  events  events @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "event_tags_post_id_fk")
+  tags    tags   @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "event_tags_tag_id_fk")
+
+  @@index([post_id], map: "event_tags_post_id_fk_idx")
+}
+
 model events {
   post_id          Int              @unique(map: "post_id_UNIQUE") @default(autoincrement())
   category_id      Int              @default(2)
@@ -97,9 +125,11 @@ model events {
   views            Int              @default(0)
   created_at       DateTime         @default(now()) @db.Timestamp(0)
   updated_at       DateTime         @default(now()) @db.Timestamp(0)
-  user_id          String           @db.VarChar(45)
   thumbnail        Int?
+  user_id          String           @db.VarChar(45)
   event_comments   event_comments[]
+  event_images     event_images[]
+  event_tags       event_tags[]
   board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "events_category_id_fk")
   images           images?          @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "events_thumbnail_fk")
   users            users            @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "events_user_id_fk")
@@ -137,16 +167,12 @@ model home_cats {
 model images {
   image_id         Int               @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
   url              String            @db.VarChar(100)
-  post_id          Int
-  category_id      Int
-  communities      communities[]
+  community_images community_images?
+  event_images     event_images?
   events           events[]
-  board_categories board_categories  @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "images_category_id")
   missing_reports  missing_reports[]
   missings         missings[]
   street_cats      street_cats[]
-
-  @@index([category_id])
 }
 
 model likes {
@@ -184,16 +210,15 @@ model messages {
   @@index([user_id])
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model missing_favorites {
-  user_id  String   @db.VarChar(45)
-  post_id  Int
-  missings missings @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_post_id_fk")
-  users    users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_user_id_fk")
+  missing_favorite_id Int      @id @unique(map: "missing_favorite_id_UNIQUE") @default(autoincrement())
+  user_id             String   @db.VarChar(45)
+  post_id             Int
+  missings            missings @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_post_id_fk")
+  users               users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_user_id_fk")
 
   @@index([post_id], map: "missing_favorites_post_id_fk_idx")
   @@index([user_id], map: "missing_favorites_user_id_fk_idx")
-  @@ignore
 }
 
 model missing_reports {
@@ -236,7 +261,7 @@ model missings {
   created_at        DateTime            @default(now()) @db.Timestamp(0)
   updated_at        DateTime            @default(now()) @db.Timestamp(0)
   thumbnail         Int?
-  missing_favorites missing_favorites[] @ignore
+  missing_favorites missing_favorites[]
   missing_reports   missing_reports[]
   board_categories  board_categories    @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "missings_category_id_fk")
   locations         locations?          @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "missings_location_id_fk")
@@ -311,7 +336,8 @@ model street_cats {
   post_id              Int                    @unique(map: "post_id_UNIQUE") @default(autoincrement())
   category_id          Int                    @default(5)
   name                 String?                @db.VarChar(10)
-  gender               String?                @db.Char(1)
+  gender               String                 @db.VarChar(10)
+  neutered             String                 @db.VarChar(10)
   neutering_date       DateTime?              @db.Date
   discovery_date       DateTime?              @db.Date
   location_id          Int
@@ -321,7 +347,6 @@ model street_cats {
   updated_at           DateTime               @default(now()) @db.Timestamp(0)
   thumbnail            Int?
   user_id              String                 @db.VarChar(45)
-  neutered             Boolean                @default(false)
   street_cat_comments  street_cat_comments[]
   street_cat_favorites street_cat_favorites[]
   board_categories     board_categories       @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_category_id_fk")
@@ -337,15 +362,10 @@ model street_cats {
 }
 
 model tags {
-  tag_id           Int              @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
-  tag              String           @db.VarChar(20)
-  category_id      Int
-  post_id          Int
-  board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_category_id_fk")
-  communities      communities      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_communities_post_id_fk")
-
-  @@index([category_id], map: "tags_category_id_fk_idx")
-  @@index([post_id], map: "tags_communities_post_id_fk_idx")
+  tag_id         Int             @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  tag            String          @db.VarChar(20)
+  community_tags community_tags?
+  event_tags     event_tags?
 }
 
 model user_oauth_secrets {
@@ -371,11 +391,12 @@ model users {
   id                                             Int                    @unique(map: "id_UNIQUE") @default(autoincrement())
   user_id                                        String                 @id @unique(map: "user_id_UNIQUE") @db.VarChar(45)
   email                                          String                 @unique(map: "email_UNIQUE") @db.VarChar(45)
-  name                                           String                 @db.VarChar(10)
+  nickname                                       String                 @db.VarChar(10)
   detail                                         String?                @db.MediumText
   auth_type                                      String                 @db.VarChar(10)
   profile_image                                  String?                @db.VarChar(100)
   created_at                                     DateTime               @default(now()) @db.Timestamp(0)
+  status                                         String                 @default("active") @db.VarChar(20)
   chats                                          chats[]
   communities                                    communities[]
   community_comments                             community_comments[]
@@ -386,7 +407,7 @@ model users {
   home_cats                                      home_cats[]
   likes                                          likes[]
   messages                                       messages[]
-  missing_favorites                              missing_favorites[]    @ignore
+  missing_favorites                              missing_favorites[]
   missing_reports                                missing_reports[]
   missings                                       missings[]
   notifications_notifications_receiver_idTousers notifications[]        @relation("notifications_receiver_idTousers")
