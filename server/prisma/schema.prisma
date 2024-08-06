@@ -7,11 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TestString {
-  idTestString  Int    @id @default(autoincrement())
-  TestStringcol String @db.VarChar(45)
-}
-
 model board_categories {
   category_id     Int               @id @unique(map: "category_id_UNIQUE") @default(autoincrement())
   category        String            @unique(map: "category_UNIQUE") @db.VarChar(20)
@@ -187,13 +182,13 @@ model messages {
 
 model missing_favorites {
   missing_favorite_id Int      @id @unique(map: "missing_favorite_id_UNIQUE") @default(autoincrement())
-  user_id             String   @db.VarChar(45)
-  post_id             Int
-  missings            missings @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_post_id_fk")
-  users               users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_user_id_fk")
+  userId             String   @db.VarChar(45) @map("user_id")              String   @map("user_id") @db.VarChar(45)
+  postId             Int @map("post_id")              Int      @map("post_id")
+  missings            missings @relation(fields: [postId             Int @map("post_id")], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_post_id_fk")
+  users               users    @relation(fields: [userId             String   @db.VarChar(45) @map("user_id")], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_favorites_user_id_fk")
 
-  @@index([post_id], map: "missing_favorites_post_id_fk_idx")
-  @@index([user_id], map: "missing_favorites_user_id_fk_idx")
+  @@index([postId             Int @map("post_id")], map: "missing_favorites_post_id_fk_idx")
+  @@index([userId             String   @db.VarChar(45) @map("user_id")], map: "missing_favorites_user_id_fk_idx")
 }
 
 model missing_reports {
@@ -344,8 +339,8 @@ model tags {
   post_id          Int
   board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_category_id_fk")
   communities      communities      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_communities_post_id_fk")
-  events           events           @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_events_post_id_fk")
-  street_cats      street_cats      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_street_cats_post_id_fk")
+  communities      events           @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_communities_post_id_fk")
+  communities      street_cats      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_communities_post_id_fk")
 
   @@index([category_id], map: "tags_category_id_fk_idx")
   @@index([post_id], map: "tags_communities_post_id_fk_idx")
