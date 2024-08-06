@@ -48,14 +48,13 @@ model communities {
   thumbnail          Int?
   user_id            String               @db.VarChar(45)
   board_categories   board_categories     @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_category_id_fk")
-  images             images?              @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_thumbnail_fk")
   users              users                @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_user_id_fk")
   community_comments community_comments[]
+  images             images[]
   tags               tags[]
 
   @@id([post_id, category_id])
   @@index([category_id])
-  @@index([thumbnail], map: "communities_thumnail_fk_idx")
   @@index([user_id], map: "communities_user_id_fk_idx")
 }
 
@@ -140,14 +139,15 @@ model images {
   url              String            @db.VarChar(100)
   post_id          Int
   category_id      Int
-  communities      communities[]
   events           events[]
   board_categories board_categories  @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "images_category_id")
+  communities      communities       @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "images_communities_post_id_fk")
   missing_reports  missing_reports[]
   missings         missings[]
   street_cats      street_cats[]
 
   @@index([category_id])
+  @@index([post_id], map: "images_communities_post_id_fk_idx")
 }
 
 model likes {
@@ -311,8 +311,8 @@ model street_cats {
   post_id              Int                    @unique(map: "post_id_UNIQUE") @default(autoincrement())
   category_id          Int                    @default(5)
   name                 String?                @db.VarChar(10)
-  gender               String?                @db.Char(1)
-  neutered             Boolean                @default(false)
+  gender               String                 @db.VarChar(10)
+  neutered             String                 @db.VarChar(10)
   neutering_date       DateTime?              @db.Date
   discovery_date       DateTime?              @db.Date
   location_id          Int
