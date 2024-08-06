@@ -23,7 +23,7 @@ export const getCommunities = async (req: Request, res: Response) => {
           select: {
             id: true,
             user_id: true,
-            name: true,
+            nickname: true,
             profile_image: true,
           },
         },
@@ -68,7 +68,7 @@ export const getCommunity = async (req: Request, res: Response) => {
           select: {
             id: true,
             user_id: true,
-            name: true,
+            nickname: true,
             profile_image: true,
           },
         },
