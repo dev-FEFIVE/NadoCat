@@ -1,12 +1,9 @@
 import express, { Request, Response } from "express";
-import prisma from "./client";
 import MissingRouter from "./routes/missings";
 import CommunitiesRouter from "./routes/communities";
 import StreetCatsRouter from "./routes/streetCats";
 
 const PORT = process.env.PORT || 3000;
-// const PORT = process.env.PORT || 3000;
-console.log(PORT);
 
 const app = express();
 app.use(express.json());
