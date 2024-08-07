@@ -165,16 +165,6 @@ model home_cats {
 }
 
 model images {
-<<<<<<< HEAD
-  image_id         Int               @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
-  url              String            @db.VarChar(100)
-  community_images community_images?
-  event_images     event_images?
-  events           events[]
-  missing_reports  missing_reports[]
-  missings         missings[]
-  street_cats      street_cats[]
-=======
   image_id          Int                @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
   url               String             @db.VarChar(100)
   community_images  community_images?
@@ -184,7 +174,6 @@ model images {
   missings          missings[]
   street_cat_images street_cat_images?
   street_cats       street_cats[]
->>>>>>> upstream/develop
 }
 
 model likes {
@@ -394,18 +383,11 @@ model street_cats {
 }
 
 model tags {
-<<<<<<< HEAD
-  tag_id         Int             @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
-  tag            String          @db.VarChar(20)
-  community_tags community_tags?
-  event_tags     event_tags?
-=======
   tag_id          Int              @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
   tag             String           @db.VarChar(20)
   community_tags  community_tags?
   event_tags      event_tags?
   street_cat_tags street_cat_tags?
->>>>>>> upstream/develop
 }
 
 model user_oauth_secrets {
@@ -420,7 +402,7 @@ model user_oauth_secrets {
 model user_secrets {
   user_secret_id Int    @id @unique(map: "user_secret_id_UNIQUE") @default(autoincrement())
   user_id        String @db.VarChar(45)
-  hash_password  String @db.VarChar(45)
+  hash_password  String @db.VarChar(200)
   salt           String @db.VarChar(45)
   users          users  @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "user_secrets_user_id_fk")
 
