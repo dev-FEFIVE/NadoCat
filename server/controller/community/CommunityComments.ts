@@ -1,6 +1,12 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../../client";
+import {
+  addComment,
+  deleteCommentById,
+  getCommunityComments,
+  updateCommentById,
+} from "../../model/communityComment.model";
 
 //  CHECKLIST
 // [] model 코드 분리
@@ -17,31 +23,7 @@ export const getComments = async (req: Request, res: Response) => {
         community_id: id,
       },
     });
-    const comments = await prisma.community_comments.findMany({
-      where: {
-        community_id: id,
-      },
-      take: limit,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { community_comment_id: cursor } : undefined,
-      orderBy: [
-        {
-          community_comment_id: "asc",
-        },
-      ],
-      select: {
-        community_comment_id: true,
-        comment: true,
-        users: {
-          select: {
-            id: true,
-            user_id: true,
-            nickname: true,
-            profile_image: true,
-          },
-        },
-      },
-    });
+    const comments = await getCommunityComments(id, limit, cursor);
 
     const nextCursor =
       comments.length === limit
@@ -77,13 +59,7 @@ export const createComment = async (req: Request, res: Response) => {
         .json({ message: "입력값을 확인해 주세요." });
     }
 
-    await prisma.community_comments.create({
-      data: {
-        user_id: userId,
-        community_id: id,
-        comment,
-      },
-    });
+    await addComment(id, userId, comment);
 
     res.status(StatusCodes.CREATED).json({ message: "댓글이 등록되었습니다." });
   } catch (error) {
@@ -107,16 +83,7 @@ export const updateComment = async (req: Request, res: Response) => {
         .json({ message: "입력값을 확인해 주세요." });
     }
 
-    await prisma.community_comments.update({
-      where: {
-        community_id: id,
-        community_comment_id: commentId,
-        user_id: userId,
-      },
-      data: {
-        comment,
-      },
-    });
+    await updateCommentById(id, userId, commentId, comment);
 
     res.status(StatusCodes.OK).json({ message: "댓글이 수정되었습니다." });
   } catch (error) {
@@ -133,13 +100,7 @@ export const deleteComment = async (req: Request, res: Response) => {
     const commentId = Number(req.params.comment_id);
     const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
 
-    await prisma.community_comments.delete({
-      where: {
-        community_id: id,
-        community_comment_id: commentId,
-        user_id: userId,
-      },
-    });
+    await deleteCommentById(id, userId, commentId);
 
     res.status(StatusCodes.OK).json({ message: "댓글이 삭제되었습니다." });
   } catch (error) {
