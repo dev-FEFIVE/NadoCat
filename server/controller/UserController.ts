@@ -1,17 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import {StatusCodes} from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import dotenv from "dotenv";
 dotenv.config();
 import bcryto from "bcrypt";
 // import crypto from "crypto";
+import { v4 as uuidv4 } from "uuid";
 
+const uuid = uuidv4();
 const prisma = new PrismaClient();
 
 //회원가입
 const signup = async (req: Request, res: Response) => {
-  const {userid, email, nickname, password, authtype} = req.body;
-
+  const {email, nickname, password, authtype} = req.body;
+  
   const hashing = async (password: string) => {
     const saltRound = 10; 
     const salt = await bcryto.genSalt(saltRound);
@@ -27,7 +29,7 @@ const signup = async (req: Request, res: Response) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.users.create({
         data: {
-          user_id: userid,
+          user_id: uuid,
           email: email,
           nickname: nickname,
           auth_type: authtype,
@@ -37,7 +39,7 @@ const signup = async (req: Request, res: Response) => {
 
       const secretUser = await prisma.user_secrets.create({
         data: {
-          user_id: userid,
+          user_id: uuid,
           hash_password: hashPassword,
           salt: salt,
         },
