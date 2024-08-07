@@ -1,17 +1,17 @@
 import express, { Request, Response } from "express";
+import MissingRouter from "./routes/missings";
 import CommunitiesRouter from "./routes/communities";
 import StreetCatsRouter from "./routes/streetCats";
 import UserRouter from "./routes/users";
 
 const PORT = process.env.PORT || 3000;
-// const PORT = process.env.PORT || 3000;
-console.log(PORT);
 
 const app = express();
 app.use(express.json());
 
 app.use("/boards/communities", CommunitiesRouter);
 app.use("/boards/street-cats", StreetCatsRouter);
+app.use('/boards/missings', MissingRouter);
 app.use("/users", UserRouter);
 
 app.use((_req: Request, res: Response) => {
