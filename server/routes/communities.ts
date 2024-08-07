@@ -5,13 +5,13 @@ import {
   createCommunity,
   deleteCommunity,
   updateCommunity,
-} from "../controller/community/CommunitiesController";
+} from "../controller/community/Communities";
 import {
   createComment,
   deleteComment,
   getComments,
   updateComment,
-} from "../controller/community/CommunitiesCommentsController";
+} from "../controller/community/CommunityComments";
 
 const router = express.Router();
 
