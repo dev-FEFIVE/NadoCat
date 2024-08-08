@@ -1,5 +1,5 @@
 import express from "express";
-import { getMissings, getMissingFavorites, postMissingFavorites, deleteMissingFavorites } from "../controller/MissingsController";
+import { getMissings, getMissingFavorites, postMissingFavorites, deleteMissingFavorites } from "../controller/missing/Missings";
 
 const router = express.Router();
 router.use(express.json());
