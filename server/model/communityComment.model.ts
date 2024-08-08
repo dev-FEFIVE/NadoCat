@@ -23,7 +23,7 @@ export const getCommunityComments = async (
       users: {
         select: {
           id: true,
-          user_id: true,
+          uuid: true,
           nickname: true,
           profile_image: true,
         },
@@ -39,7 +39,7 @@ export const addComment = async (
 ) => {
   return await prisma.community_comments.create({
     data: {
-      user_id: userId,
+      uuid: Buffer.from(userId, "hex"),
       community_id: postId,
       comment,
     },
@@ -56,7 +56,7 @@ export const updateCommentById = async (
     where: {
       community_id: postId,
       community_comment_id: commentId,
-      user_id: userId,
+      uuid: Buffer.from(userId, "hex"),
     },
     data: {
       comment,
@@ -73,7 +73,7 @@ export const deleteCommentById = async (
     where: {
       community_id: postId,
       community_comment_id: commentId,
-      user_id: userId,
+      uuid: Buffer.from(userId, "hex"),
     },
   });
 };

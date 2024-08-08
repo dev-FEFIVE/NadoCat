@@ -39,6 +39,21 @@ const getOrderBy = (sort: string) => {
   }
 };
 
+//NOTE 사용자 정보를 받아오기 위한 임시 함수
+export const getUserId = async () => {
+  const result = await prisma.$queryRaw<{ HEX: string }[]>`
+    SELECT HEX(uuid) AS HEX
+    FROM users
+    WHERE id = 1;
+  `;
+
+  if (!result) {
+    throw new Error("사용자 정보 없음");
+  }
+
+  return result[0].HEX;
+};
+
 export const getCommunities = async (req: Request, res: Response) => {
   try {
     const limit = Number(req.query.limit) || 5;
@@ -87,11 +102,11 @@ export const getCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const categoryId = Number(req.query.category_id) || 1;
-    const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
+    const userId = await getUserId(); // NOTE 임시 값으로 나중에 수정 필요
 
     const community = await getCommunityById(id, categoryId);
 
-    if (!community.post_id) {
+    if (!community) {
       return res
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "게시글을 찾을 수 없습니다." });
@@ -110,7 +125,7 @@ export const getCommunity = async (req: Request, res: Response) => {
       where: {
         post_id: id,
         category_id: categoryId,
-        user_id: userId,
+        uuid: Buffer.from(userId, "hex"), // NOTE 타입 변환
       },
     });
 
@@ -136,7 +151,7 @@ export const createCommunity = async (req: Request, res: Response) => {
   try {
     const { title, content, tags, images } = req.body;
     const categoryId = Number(req.query.category_id) || 1;
-    const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
+    const userId = await getUserId(); // NOTE 임시 값으로 나중에 수정 필요
 
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const post = await addCommunity(tx, userId, title, content, categoryId);
@@ -193,7 +208,8 @@ export const updateCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const categoryId = Number(req.query.category_id) || 1;
-    const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
+    const userId = await getUserId();
+
     const {
       title,
       content,
@@ -273,17 +289,17 @@ export const deleteCommunity = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const categoryId = Number(req.query.category_id) || 1;
-    const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
+    const userId = await getUserId(); // NOTE 임시 값으로 나중에 수정 필요
+
+    const post = await getCommunityById(id, categoryId);
+
+    if (!post) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "게시글을 찾을 수 없습니다." });
+    }
 
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const post = await getCommunityById(id, categoryId);
-
-      if (!post) {
-        return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "게시글을 찾을 수 없습니다." });
-      }
-
       if (post.community_tags?.length) {
         const tagIds = post.community_tags.map((item: ITag) => item.tag_id);
         await deleteCommunityTagByTagIds(tx, tagIds);
