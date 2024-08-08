@@ -1,7 +1,10 @@
-import prisma from "../client";
+import { Prisma } from "@prisma/client";
 
-export const deleteImages = async (imageIds: number[]) => {
-  return await prisma.images.deleteMany({
+export const deleteImages = async (
+  tx: Prisma.TransactionClient,
+  imageIds: number[]
+) => {
+  return await tx.images.deleteMany({
     where: {
       image_id: {
         in: imageIds,
@@ -10,8 +13,8 @@ export const deleteImages = async (imageIds: number[]) => {
   });
 };
 
-export const addImage = async (url: string) => {
-  return await prisma.images.create({
+export const addImage = async (tx: Prisma.TransactionClient, url: string) => {
+  return await tx.images.create({
     data: {
       url,
     },
