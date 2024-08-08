@@ -1,8 +1,6 @@
 import express, { Router } from "express";
-import signup from "../controller/UserController";
-import conn from "../mariadb";
-
 const router: Router = express.Router();
+import signup from "../controller/UserController";
 
 router.use(express.json());
 

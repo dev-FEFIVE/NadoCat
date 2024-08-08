@@ -12,13 +12,11 @@ model board_categories {
   category        String            @unique(map: "category_UNIQUE") @db.VarChar(20)
   communities     communities[]
   events          events[]
-  images          images[]
   likes           likes[]
   missing_reports missing_reports[]
   missings        missings[]
   reports         reports[]
   street_cats     street_cats[]
-  tags            tags[]
 }
 
 model chats {
@@ -45,8 +43,8 @@ model communities {
   board_categories   board_categories     @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_category_id_fk")
   users              users                @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "communities_user_id_fk")
   community_comments community_comments[]
-  images             images[]
-  tags               tags[]
+  community_images   community_images[]
+  community_tags     community_tags[]
 
   @@id([post_id, category_id])
   @@index([category_id])
@@ -67,6 +65,24 @@ model community_comments {
   @@index([user_id], map: "community_comments_user_id_fk_idx")
 }
 
+model community_images {
+  image_id    Int         @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
+  post_id     Int
+  images      images      @relation(fields: [image_id], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "community_images_image_id_fk")
+  communities communities @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "community_images_post_id_fk")
+
+  @@index([post_id], map: "community_images_post_id_fk_idx")
+}
+
+model community_tags {
+  tag_id      Int         @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  post_id     Int
+  communities communities @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "community_tags_post_id_fk")
+  tags        tags        @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "community_tags_tag_id_fk")
+
+  @@index([post_id], map: "community_tags_post_id_fk_idx")
+}
+
 model event_comments {
   event_comment_id Int      @id @unique(map: "event_comment_id_UNIQUE") @default(autoincrement())
   event_id         Int
@@ -79,6 +95,24 @@ model event_comments {
 
   @@index([event_id], map: "event_comments_event_id_fk_idx")
   @@index([user_id], map: "event_comments_user_id_fk_idx")
+}
+
+model event_images {
+  image_id Int     @id
+  post_id  Int?
+  images   images  @relation(fields: [image_id], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "event_images_image_id_fk")
+  events   events? @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "event_images_post_id_fk")
+
+  @@index([post_id], map: "event_images_post_id_fk_idx")
+}
+
+model event_tags {
+  tag_id  Int    @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  post_id Int
+  events  events @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "event_tags_post_id_fk")
+  tags    tags   @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "event_tags_tag_id_fk")
+
+  @@index([post_id], map: "event_tags_post_id_fk_idx")
 }
 
 model events {
@@ -94,10 +128,11 @@ model events {
   thumbnail        Int?
   user_id          String           @db.VarChar(45)
   event_comments   event_comments[]
+  event_images     event_images[]
+  event_tags       event_tags[]
   board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "events_category_id_fk")
   images           images?          @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "events_thumbnail_fk")
   users            users            @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "events_user_id_fk")
-  tags             tags[]
 
   @@id([post_id, category_id])
   @@index([category_id], map: "events_category_id_fk_idx")
@@ -130,19 +165,26 @@ model home_cats {
 }
 
 model images {
+<<<<<<< HEAD
   image_id         Int               @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
   url              String            @db.VarChar(100)
-  post_id          Int
-  category_id      Int
+  community_images community_images?
+  event_images     event_images?
   events           events[]
-  board_categories board_categories  @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "images_category_id")
-  communities      communities       @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "images_communities_post_id_fk")
   missing_reports  missing_reports[]
   missings         missings[]
   street_cats      street_cats[]
-
-  @@index([category_id])
-  @@index([post_id], map: "images_communities_post_id_fk_idx")
+=======
+  image_id          Int                @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
+  url               String             @db.VarChar(100)
+  community_images  community_images?
+  event_images      event_images?
+  events            events[]
+  missing_reports   missing_reports[]
+  missings          missings[]
+  street_cat_images street_cat_images?
+  street_cats       street_cats[]
+>>>>>>> upstream/develop
 }
 
 model likes {
@@ -302,6 +344,24 @@ model street_cat_favorites {
   @@index([post_id], map: "street_cat_favorites_post_id_fk_idx")
 }
 
+model street_cat_images {
+  image_id    Int         @id @unique(map: "image_id_UNIQUE") @default(autoincrement())
+  post_id     Int
+  images      images      @relation(fields: [image_id], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cat_images_image_id_fk")
+  street_cats street_cats @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cat_images_post_id_fk")
+
+  @@index([post_id], map: "street_cat_images_post_id_fk_idx")
+}
+
+model street_cat_tags {
+  tag_id      Int         @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  post_id     Int
+  street_cats street_cats @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cat_tags_post_id_fk")
+  tags        tags        @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cat_tags_tag_id_fk")
+
+  @@index([post_id], map: "street_cat_tags_post_id_fk_idx")
+}
+
 model street_cats {
   post_id              Int                    @unique(map: "post_id_UNIQUE") @default(autoincrement())
   category_id          Int                    @default(5)
@@ -319,11 +379,12 @@ model street_cats {
   user_id              String                 @db.VarChar(45)
   street_cat_comments  street_cat_comments[]
   street_cat_favorites street_cat_favorites[]
+  street_cat_images    street_cat_images[]
+  street_cat_tags      street_cat_tags[]
   board_categories     board_categories       @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_category_id_fk")
   locations            locations              @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_location_id_fk")
   images               images?                @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_thumbnail_fk")
   users                users                  @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "street_cats_user_id_fk")
-  tags                 tags[]
 
   @@id([post_id, category_id])
   @@index([category_id])
@@ -333,17 +394,18 @@ model street_cats {
 }
 
 model tags {
-  tag_id           Int              @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
-  tag              String           @db.VarChar(20)
-  category_id      Int
-  post_id          Int
-  board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_category_id_fk")
-  communities      communities      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_communities_post_id_fk")
-  events           events           @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_events_post_id_fk")
-  street_cats      street_cats      @relation(fields: [post_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "tags_street_cats_post_id_fk")
-
-  @@index([category_id], map: "tags_category_id_fk_idx")
-  @@index([post_id], map: "tags_communities_post_id_fk_idx")
+<<<<<<< HEAD
+  tag_id         Int             @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  tag            String          @db.VarChar(20)
+  community_tags community_tags?
+  event_tags     event_tags?
+=======
+  tag_id          Int              @id @unique(map: "tag_id_UNIQUE") @default(autoincrement())
+  tag             String           @db.VarChar(20)
+  community_tags  community_tags?
+  event_tags      event_tags?
+  street_cat_tags street_cat_tags?
+>>>>>>> upstream/develop
 }
 
 model user_oauth_secrets {
