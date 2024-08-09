@@ -1,7 +1,10 @@
-import prisma from "../client";
+import { Prisma } from "@prisma/client";
 
-export const deleteTags = async (tagIds: number[]) => {
-  return await prisma.tags.deleteMany({
+export const deleteTags = async (
+  tx: Prisma.TransactionClient,
+  tagIds: number[]
+) => {
+  return await tx.tags.deleteMany({
     where: {
       tag_id: {
         in: tagIds,
@@ -10,8 +13,8 @@ export const deleteTags = async (tagIds: number[]) => {
   });
 };
 
-export const addTag = async (tag: string) => {
-  return await prisma.tags.create({
+export const addTag = async (tx: Prisma.TransactionClient, tag: string) => {
+  return await tx.tags.create({
     data: {
       tag,
     },

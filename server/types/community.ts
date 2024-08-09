@@ -22,7 +22,7 @@ export interface ICommunityTag {
 
 interface IUser {
   id: number;
-  user_id: string;
+  uuid: Buffer; // 맞나..?
   nickname: string;
   profile_image: string | null;
 }

@@ -7,12 +7,13 @@ import {
   getCommunityComments,
   updateCommentById,
 } from "../../model/communityComment.model";
+import { Prisma } from "@prisma/client";
+import { getUserId } from "./Communities";
 
 //  CHECKLIST
-// [] model 코드 분리
+// [x] model 코드 분리
 // [] 에러처리 자세하게 구현하기
 // [] 사용자 정보 받아오는 부분 구현 필요
-
 export const getComments = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
@@ -51,7 +52,7 @@ export const createComment = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const comment = req.body.comment;
-    const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
+    const userId = await getUserId(); // NOTE 임시 값으로 나중에 수정 필요
 
     if (!comment) {
       return res
@@ -75,7 +76,7 @@ export const updateComment = async (req: Request, res: Response) => {
     const id = Number(req.params.community_id);
     const commentId = Number(req.params.comment_id);
     const comment = req.body.comment;
-    const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
+    const userId = await getUserId(); // NOTE 임시 값으로 나중에 수정 필요
 
     if (!comment) {
       return res
@@ -88,6 +89,14 @@ export const updateComment = async (req: Request, res: Response) => {
     res.status(StatusCodes.OK).json({ message: "댓글이 수정되었습니다." });
   } catch (error) {
     console.error(error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "존재하지 않는 댓글입니다." });
+      }
+    }
+    
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ message: "Internal Server Error" });
@@ -98,13 +107,21 @@ export const deleteComment = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.community_id);
     const commentId = Number(req.params.comment_id);
-    const userId = "aaa"; // TODO 사용자 정보 받아오기 수정 필요
+    const userId = await getUserId(); // NOTE 임시 값으로 나중에 수정 필요
 
     await deleteCommentById(id, userId, commentId);
 
     res.status(StatusCodes.OK).json({ message: "댓글이 삭제되었습니다." });
   } catch (error) {
     console.error(error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "존재하지 않는 댓글입니다." });
+      }
+    }
+
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ message: "Internal Server Error" });

@@ -7,8 +7,9 @@ import {
   getStreetCat,
   createStreetCat,
   updateStreetCat,
-  deleteStreetCat
-} from '../controller/StreetCatsController';
+  deleteStreetCat,
+  addFavoritCat
+} from '../controller/streetCat/StreetCats';
 
 // 동네 고양이 도감 목록 조회
 router.get('/', getStreetCats);
@@ -24,5 +25,9 @@ router.put('/:street_cat_id', updateStreetCat);
 
 // 동네 고양이 도감 삭제
 router.delete('/:street_cat_id', deleteStreetCat);
+
+// 내 도감 목록 조회
+// 내 도감 추가
+// 내 도감 삭제
 
 export default router;
