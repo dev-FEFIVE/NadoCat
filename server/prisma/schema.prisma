@@ -207,13 +207,14 @@ model Likes {
 }
 
 model Locations {
-  locationId     Int              @id @unique(map: "idlocation_id_UNIQUE") @default(autoincrement()) @map("location_id")
-  longitude      Float            @db.Float
-  latitude       Float            @db.Float
-  detail         String           @db.VarChar(100)
-  missingReports MissingReports[]
-  missings       Missings[]
-  streetCats     StreetCats[]
+  locationId       Int               @id @unique(map: "idlocation_id_UNIQUE") @default(autoincrement()) @map("location_id")
+  longitude        Float             @db.Float
+  latitude         Float             @db.Float
+  detail           String            @db.VarChar(100)
+  missingLocations MissingLocations?
+  missingReports   MissingReports[]
+  missings         Missings[]
+  streetCats       StreetCats[]
 
   @@map("locations")
 }
@@ -252,6 +253,16 @@ model MissingImages {
 
   @@index([postId], map: "missing_images_post_id_fk_idx")
   @@map("missing_images")
+}
+
+model MissingLocations {
+  locationId Int       @id @unique(map: "location_id_UNIQUE") @map("location_id")
+  postId     Int       @map("post_id")
+  locations  Locations @relation(fields: [locationId], references: [locationId], onDelete: NoAction, onUpdate: NoAction, map: "missing_locations_location_id_fk")
+  missings   Missings  @relation(fields: [postId], references: [postId], onDelete: NoAction, onUpdate: NoAction, map: "missing_locations_post_id_fk")
+
+  @@index([postId], map: "missing_locations_post_id_fk_idx")
+  @@map("missing_locations")
 }
 
 model MissingReportImages {
@@ -308,6 +319,7 @@ model Missings {
   thumbnail        Int?
   missingFavorites MissingFavorites[]
   missingImages    MissingImages[]
+  missingLocations MissingLocations[]
   missingReports   MissingReports[]
   boardCategories  BoardCategories    @relation(fields: [categoryId], references: [categoryId], onDelete: NoAction, onUpdate: NoAction, map: "missings_category_id_fk")
   locations        Locations?         @relation(fields: [locationId], references: [locationId], onDelete: NoAction, onUpdate: NoAction, map: "missings_location_id_fk")
