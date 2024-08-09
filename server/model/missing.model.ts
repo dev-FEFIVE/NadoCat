@@ -19,3 +19,14 @@ export const addMissingImages = async (
     data: images
   });
 }
+
+export const getMissing = async (
+  tx: Prisma.TransactionClient,
+  postId: number
+) => {
+  return await tx.missings.findUnique({
+    where: {
+      postId
+    }
+  })
+}
