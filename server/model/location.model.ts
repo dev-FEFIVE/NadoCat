@@ -7,8 +7,7 @@ export const addLocation = async (
 ) =>
   await tx.locations.create({
     data: {
-      longitude: location.longitude,
-      latitude: location.latitude,
+      ...location,
       detail: location.detail || ""
     },
   });
