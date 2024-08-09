@@ -12,16 +12,14 @@ import { StatusCodes } from "http-status-codes";
  * - [x] 즐겨찾기 삭제 API
  */
 
-const include = {
-  board_categories: true,
-  users: true,
-  locations: true,
-};
-
 export const getMissings = async (req: Request, res: Response) => {
   try {
     const results = await prisma.missings.findMany({
-      include: include,
+      include: {
+        boardCategories: true,
+        users: true,
+        locations: true,
+      },
     });
     res.json(results);
   } catch (error) {

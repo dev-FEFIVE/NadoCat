@@ -2,12 +2,6 @@ import prisma from "../../client";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-const include = {
-  board_categories: true,
-  users: true,
-  locations: true,
-};
-
 /**
  * CHECKLIST
  * - [ ] users 인가 기능 업데이트되면 인가 적용하기
@@ -17,7 +11,7 @@ export const getMissingFavorites = async (req: Request, res: Response) => {
   try {
     const favoriteId = await prisma.missingFavorites.findMany({
       where: {
-        uuid: Buffer.from(`0`)
+        uuid: Buffer.from(`test`, 'hex')
       }
     }).then((favorites) => favorites.map((favorite) => favorite.postId));
 
@@ -27,10 +21,15 @@ export const getMissingFavorites = async (req: Request, res: Response) => {
           in: favoriteId
         }
       },
-      include: include,
+      include: {
+        boardCategories: true,
+        users: true,
+        locations: true,
+      },
     })
     res.json(results);
   } catch (error) {
+    console.log(error);
     res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
@@ -42,12 +41,11 @@ export const getMissingFavorites = async (req: Request, res: Response) => {
  */
 
 export const postMissingFavorites = async (req: Request, res: Response) => {
-  const uuid: number = 0;
   const postId: number = Number(req.body.postId);
   try {
     const result = await prisma.missingFavorites.create({
       data: {
-        uuid: Buffer.from(`${uuid}`),
+        uuid: Buffer.from(`test`, 'hex'),
         postId: postId,
       }
     });
