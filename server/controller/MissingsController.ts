@@ -36,15 +36,15 @@ export const getMissings = async (req: Request, res: Response) => {
  */
 export const getMissingFavorites = async (req: Request, res: Response) => {
   try {
-    const favoriteId = await prisma.missing_favorites.findMany({
+    const favoriteId = await prisma.missingFavorites.findMany({
       where: {
-        user_id: "test"
+        uuid: Buffer.from("test", "hex")
       }
-    }).then((favorites) => favorites.map((favorite) => favorite.post_id));
+    }).then((favorites) => favorites.map((favorite) => favorite.postId));
 
     const results = await prisma.missings.findMany({
       where: {
-        post_id: {
+        postId: {
           in: favoriteId
         }
       },
@@ -63,12 +63,12 @@ export const getMissingFavorites = async (req: Request, res: Response) => {
  */
 
 export const postMissingFavorites = async (req: Request, res: Response) => {
-  const postId = Number(req.body.post_id);
+  const postId = Number(req.body.postId);
   try {
-    const result = await prisma.missing_favorites.create({
+    const result = await prisma.missingFavorites.create({
       data: {
-        user_id: "test",
-        post_id: postId,
+        uuid: Buffer.from("test", "hex"),
+        postId: postId,
       }
     });
     res.json(result);
@@ -87,11 +87,11 @@ export const deleteMissingFavorites = async (req: Request, res: Response) => {
   const postId = Number(req.params.postId);
   console.log(postId);
   try {
-    const result = await prisma.missing_favorites.deleteMany({
+    const result = await prisma.missingFavorites.deleteMany({
       where: {
-        // missing_favorite_id: undefined,
-        user_id: "test",
-        post_id: postId
+        // missingFavoriteId: undefined,
+        uuid: Buffer.from("test", "hex"),
+        postId: postId
       }
     })
     res.json(result);
