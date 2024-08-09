@@ -8,6 +8,8 @@ import bcryto from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
 const uuid = uuidv4();
+const uuidBuffer = Buffer.from(uuid.replace(/-/g, ""), "hex");
+console.log("uuidBuffer:", uuidBuffer);
 
 const prisma = new PrismaClient();
 
@@ -30,7 +32,7 @@ const signup = async (req: Request, res: Response) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.users.create({
         data: {
-          user_id: uuid,
+          uuid: uuidBuffer,
           email: email,
           nickname: nickname,
           auth_type: authtype,
@@ -40,7 +42,7 @@ const signup = async (req: Request, res: Response) => {
 
       const secretUser = await prisma.user_secrets.create({
         data: {
-          user_id: uuid,
+          uuid: uuidBuffer,
           hash_password: hashPassword,
           salt: salt,
         },
@@ -49,13 +51,17 @@ const signup = async (req: Request, res: Response) => {
       return {user, secretUser};
     })
 
+    
+    //변환 확인용으로 넣음
+    const userUuidString = result.user.uuid.toString("hex").match(/.{1,4}/g)?.join("-");
+    console.log("userUuidString:", userUuidString);
 
     if(result.user && result.secretUser){
       return res.status(StatusCodes.CREATED).json({
         message: "회원가입 성공!",
         user: {
           id: result.user.id,
-          userId: result.user.user_id,
+          userId: result.user.uuid,
           email: result.user.email,
           nickname: result.user.nickname,
           authtype: result.user.auth_type
@@ -64,7 +70,7 @@ const signup = async (req: Request, res: Response) => {
     }else{
       return res.status(StatusCodes.BAD_REQUEST).json({message: "회원가입 실패!"});
     }
-
+      
   }catch(error){
     console.log("회원가입 error:", error);
     return res.status(StatusCodes.BAD_REQUEST).end();
