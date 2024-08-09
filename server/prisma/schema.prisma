@@ -204,7 +204,7 @@ model messages {
   chat_id    Int
   content    String   @db.LongText
   sent_at    DateTime @db.Timestamp(0)
-  chats      chats    @relation(fields: [chat_id], references: [chat_id], onDelete: NoAction, onUpdate: NoAction, map: "messages_chat_id")
+  chats      chats    @relation(fields: [chat_id], references: [chat_id], onDelete: NoAction, onUpdate: NoAction, map: "messages_chat_id_fk")
   users      users    @relation(fields: [uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction, map: "messages_uuid_fk")
 
   @@index([chat_id])
@@ -238,15 +238,15 @@ model missing_reports {
   board_categories board_categories @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_reports_category_id")
   locations        locations        @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_reports_location_id_fk")
   missings         missings         @relation(fields: [missing_id], references: [post_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_reports_missing_id_fk")
-  images           images?          @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "missint_reports_thumbnail_fk")
+  images           images?          @relation(fields: [thumbnail], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "missing_reports_thumbnail_fk")
   users            users            @relation(fields: [uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction, map: "missing_reports_uuid_fk")
 
   @@id([post_id, category_id])
   @@index([category_id])
   @@index([location_id], map: "missing_reports_location_id_fk_idx")
   @@index([missing_id])
-  @@index([thumbnail], map: "missint_reports_thumbnail_fk_idx")
   @@index([uuid], map: "missing_reports_uuid_fk_idx")
+  @@index([thumbnail], map: "missint_reports_thumbnail_fk_idx")
 }
 
 model missings {
@@ -294,9 +294,9 @@ model notifications {
   users_notifications_sender_idTousers   users              @relation("notifications_sender_idTousers", fields: [sender_id], references: [uuid], onDelete: NoAction, onUpdate: NoAction, map: "notifications_sender_id_fk")
   notification_types                     notification_types @relation(fields: [type_id], references: [notification_type_id], onDelete: NoAction, onUpdate: NoAction, map: "notifications_type_id_fk")
 
+  @@index([receiver_id], map: "notifications_receiver_id_fk_idx")
   @@index([sender_id], map: "notifications_sender_id_fk_idx")
   @@index([type_id], map: "notifications_type_id_fk_idx")
-  @@index([receiver_id], map: "notifications_receiver_id_fk_idx")
 }
 
 model reports {
