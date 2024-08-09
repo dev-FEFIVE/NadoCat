@@ -19,17 +19,15 @@ export const getComments = async (req: Request, res: Response) => {
     const id = Number(req.params.community_id);
     const limit = Number(req.query.limit) || 5;
     const cursor = req.query.cursor ? Number(req.query.cursor) : undefined;
-    const count = await prisma.community_comments.count({
+    const count = await prisma.communityComments.count({
       where: {
-        community_id: id,
+        communityId: id,
       },
     });
     const comments = await getCommunityComments(id, limit, cursor);
 
     const nextCursor =
-      comments.length === limit
-        ? comments[comments.length - 1].community_comment_id
-        : null;
+      comments.length === limit ? comments[comments.length - 1].comment : null;
 
     const result = {
       comments,
@@ -96,7 +94,7 @@ export const updateComment = async (req: Request, res: Response) => {
           .json({ message: "존재하지 않는 댓글입니다." });
       }
     }
-    
+
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ message: "Internal Server Error" });
