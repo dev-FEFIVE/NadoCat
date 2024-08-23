@@ -47,6 +47,11 @@ const Login = () => {
         .getState()
         .storeLogin(tokens.accessToken, user.uuid, tokens.refreshToken ?? "");
 
+        sessionStorage.setItem("uuid", user.uuid);
+        if(tokens.refreshToken){
+            useAuthStore.getState().storeAutoLogin(tokens.refreshToken);
+        }
+        
       navigate("/home");
     });
   };
