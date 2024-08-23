@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Chat from "../../pages/chat/Chat";
+import { useNavigate } from "react-router-dom";
 import "../../styles/scss/components/user/userInfo.scss";
 import { IoIosAdd } from "react-icons/io";
 
